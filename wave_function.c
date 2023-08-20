@@ -40,7 +40,7 @@ int num_possibilities(uint_fast16_t tile) {
     return num;
 }
 
-void num_mine_neighbors(uint_fast16_t* tiles, int point[2], uint mines[2], int board_width, int board_height) {
+void num_mine_neighbors(uint_fast16_t* tiles, int point[2], unsigned int mines[2], int board_width, int board_height) {
     bool left = point[0] > 0;
     bool right = point[0] < board_width - 1;
     bool up = point[1] > 0;
@@ -166,7 +166,7 @@ void update_wave_function(uint_fast16_t* tiles, QUEUE* update_queue, int board_w
             #ifdef DEBUG
             printf("Tile is known\n");
             #endif
-            uint mines[2];
+            unsigned int mines[2];
             num_mine_neighbors(tiles, point, mines, board_width, board_height);
             if (mines[0] == mines[1]) {
                 #ifdef DEBUG
@@ -206,7 +206,7 @@ void update_wave_function(uint_fast16_t* tiles, QUEUE* update_queue, int board_w
             enqueue_neighbors(update_queue, point, board_width, board_height);
             continue;
         }
-        uint mines[2];
+        unsigned int mines[2];
         num_mine_neighbors(tiles, point, mines, board_width, board_height);
         if (mines[0] == mines[1] && !(tile & 0b001000000000)) {
             #ifdef DEBUG
@@ -222,7 +222,7 @@ void update_wave_function(uint_fast16_t* tiles, QUEUE* update_queue, int board_w
         printf("Max mines: %d\n", mines[1]);
         #endif
         uint_fast16_t old_tile = tile;
-        for (uint i = 0; i < mines[0]; i++) {
+        for (unsigned int i = 0; i < mines[0]; i++) {
             #ifdef DEBUG
             printf("Removing %d\n", i);
             #endif
