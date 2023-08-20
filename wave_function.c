@@ -160,7 +160,7 @@ void update_wave_function(uint_fast16_t* tiles, QUEUE* update_queue, int board_w
         uint_fast16_t tile = tiles[point[1] * board_height + point[0]];
         #ifdef DEBUG
         printf("Point: (%d, %d)\n", point[0], point[1]);
-        printf("Tile: %lx\n", tile);
+        printf("Tile: %" PRIxFAST16 "\n", tile);
         #endif
         if (tile & 0b010000000000) {
             #ifdef DEBUG
@@ -241,7 +241,7 @@ void update_wave_function(uint_fast16_t* tiles, QUEUE* update_queue, int board_w
             continue;
         }
         #ifdef DEBUG
-        printf("Tile is now %lx\n", tile);
+        printf("Tile is now %" PRIxFAST16 "\n" , tile);
         #endif
         tiles[point[1] * board_height + point[0]] = tile;
         enqueue_neighbors(update_queue, point, board_width, board_height);

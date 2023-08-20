@@ -3,6 +3,7 @@
 
 #ifdef DEBUG
 #include <stdio.h>
+#include <inttypes.h>
 #endif
 
 #include <stdint.h>
