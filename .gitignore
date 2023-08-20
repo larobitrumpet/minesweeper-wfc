@@ -1,0 +1,4 @@
+minesweeper-wfc
+*.o
+*.d
+minesweeper-wfc.xcf
