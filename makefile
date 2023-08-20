@@ -1,8 +1,13 @@
 program := minesweeper-wfc
 
-CC := gcc
 CFLAGS := -Wall -Wextra -Werror -MMD
 LDFLAGS := $$(pkg-config allegro-5 allegro_image-5 --libs --cflags)
+
+ifneq ($(W),1)
+CC := gcc
+else
+CC := x86_64-w64-mingw32-gcc
+endif
 
 ifneq ($(D),1)
 CFLAGS += -O3
@@ -24,4 +29,4 @@ minesweeper-wfc: $(objs)
 	$(CC) $(CFLAGS) -o $@ -c $<
 
 clean:
-	rm -f $(program) $(objs) $(deps)
+	rm -f $(program) $(program).exe $(objs) $(deps)
