@@ -4,3 +4,4 @@ minesweeper-wfc.exe
 *.d
 minesweeper-wfc.xcf
 allegro5-build/
+*.tar*
