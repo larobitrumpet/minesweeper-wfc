@@ -1,8 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
-#include <allegro5/allegro5.h>
-#include <allegro5/allegro_image.h>
+#include "allegro5/allegro5.h"
+#include "allegro5/allegro_image.h"
 #include "render.h"
 #include "wave_function.h"
 #include "queue.h"

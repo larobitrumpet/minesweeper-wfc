@@ -2,8 +2,8 @@
 #define RENDER_H
 
 #include <stdint.h>
-#include <allegro5/allegro5.h>
-#include <allegro5/allegro_image.h>
+#include "allegro5/allegro5.h"
+#include "allegro5/allegro_image.h"
 
 #define TILE_W 22
 #define TILE_H 22

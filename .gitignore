@@ -3,3 +3,4 @@ minesweeper-wfc.exe
 *.o
 *.d
 minesweeper-wfc.xcf
+allegro5-build/
