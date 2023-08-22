@@ -138,14 +138,14 @@ void draw(uint_fast16_t* tiles, int board_width, int board_height)
     disp_post_draw();
 }
 
-void parse_input(uint_fast16_t* tiles, uint_fast16_t* prev_tiles, QUEUE* update_queue, int board_width, int board_height) {
+void parse_input(uint_fast16_t** tiles, uint_fast16_t** prev_tiles, QUEUE* update_queue, int board_width, int board_height) {
     if (!(key[ALLEGRO_KEY_LEFT] || key[ALLEGRO_KEY_RIGHT] || key[ALLEGRO_KEY_UP] || key[ALLEGRO_KEY_DOWN])) {
         select_move_cooldown = 0;
     }
     if (select_move_cooldown) {
         select_move_cooldown--;
     } else {
-        tiles[selected[1] * board_height + selected[0]] &= 0b011111111111;
+        (*tiles)[selected[1] * board_height + selected[0]] &= 0b011111111111;
         if (key[ALLEGRO_KEY_LEFT]) {
             selected[0]--;
             select_move_cooldown = 8;
@@ -170,84 +170,84 @@ void parse_input(uint_fast16_t* tiles, uint_fast16_t* prev_tiles, QUEUE* update_
             selected[1] = 0;
         if (selected[1] > board_height - 1)
             selected[1] = board_height - 1;
-        tiles[selected[1] * board_height + selected[0]] |= 0b100000000000;
+        (*tiles)[selected[1] * board_height + selected[0]] |= 0b100000000000;
     }
-    if (!(tiles[selected[1] * board_height + selected[0]] & 0b010000000000)) {
+    if (!((*tiles)[selected[1] * board_height + selected[0]] & 0b010000000000)) {
         if (key[ALLEGRO_KEY_0]) {
-            memcpy(prev_tiles, tiles, board_width * board_height * sizeof(uint_fast16_t));
+            memcpy(*prev_tiles, *tiles, board_width * board_height * sizeof(uint_fast16_t));
             can_undo = true;
-            tiles[selected[1] * board_height + selected[0]] = 0b110000000000;
+            (*tiles)[selected[1] * board_height + selected[0]] = 0b110000000000;
             enqueue_neighbors(update_queue, selected, board_width, board_height);
-            update_wave_function(tiles, update_queue, board_width, board_height);
+            update_wave_function(*tiles, update_queue, board_width, board_height);
         }
         if (key[ALLEGRO_KEY_1]) {
-            memcpy(prev_tiles, tiles, board_width * board_height * sizeof(uint_fast16_t));
+            memcpy(*prev_tiles, *tiles, board_width * board_height * sizeof(uint_fast16_t));
             can_undo = true;
-            tiles[selected[1] * board_height + selected[0]] = 0b110000000001;
+            (*tiles)[selected[1] * board_height + selected[0]] = 0b110000000001;
             enqueue_neighbors(update_queue, selected, board_width, board_height);
-            update_wave_function(tiles, update_queue, board_width, board_height);
+            update_wave_function(*tiles, update_queue, board_width, board_height);
         }
         if (key[ALLEGRO_KEY_2]) {
-            memcpy(prev_tiles, tiles, board_width * board_height * sizeof(uint_fast16_t));
+            memcpy(*prev_tiles, *tiles, board_width * board_height * sizeof(uint_fast16_t));
             can_undo = true;
-            tiles[selected[1] * board_height + selected[0]] = 0b110000000010;
+            (*tiles)[selected[1] * board_height + selected[0]] = 0b110000000010;
             enqueue_neighbors(update_queue, selected, board_width, board_height);
-            update_wave_function(tiles, update_queue, board_width, board_height);
+            update_wave_function(*tiles, update_queue, board_width, board_height);
         }
         if (key[ALLEGRO_KEY_3]) {
-            memcpy(prev_tiles, tiles, board_width * board_height * sizeof(uint_fast16_t));
+            memcpy(*prev_tiles, *tiles, board_width * board_height * sizeof(uint_fast16_t));
             can_undo = true;
-            tiles[selected[1] * board_height + selected[0]] = 0b110000000011;
+            (*tiles)[selected[1] * board_height + selected[0]] = 0b110000000011;
             enqueue_neighbors(update_queue, selected, board_width, board_height);
-            update_wave_function(tiles, update_queue, board_width, board_height);
+            update_wave_function(*tiles, update_queue, board_width, board_height);
         }
         if (key[ALLEGRO_KEY_4]) {
-            memcpy(prev_tiles, tiles, board_width * board_height * sizeof(uint_fast16_t));
+            memcpy(*prev_tiles, *tiles, board_width * board_height * sizeof(uint_fast16_t));
             can_undo = true;
-            tiles[selected[1] * board_height + selected[0]] = 0b110000000100;
+            (*tiles)[selected[1] * board_height + selected[0]] = 0b110000000100;
             enqueue_neighbors(update_queue, selected, board_width, board_height);
-            update_wave_function(tiles, update_queue, board_width, board_height);
+            update_wave_function(*tiles, update_queue, board_width, board_height);
         }
         if (key[ALLEGRO_KEY_5]) {
-            memcpy(prev_tiles, tiles, board_width * board_height * sizeof(uint_fast16_t));
+            memcpy(*prev_tiles, *tiles, board_width * board_height * sizeof(uint_fast16_t));
             can_undo = true;
-            tiles[selected[1] * board_height + selected[0]] = 0b110000000101;
+            (*tiles)[selected[1] * board_height + selected[0]] = 0b110000000101;
             enqueue_neighbors(update_queue, selected, board_width, board_height);
-            update_wave_function(tiles, update_queue, board_width, board_height);
+            update_wave_function(*tiles, update_queue, board_width, board_height);
         }
         if (key[ALLEGRO_KEY_6]) {
-            memcpy(prev_tiles, tiles, board_width * board_height * sizeof(uint_fast16_t));
+            memcpy(*prev_tiles, *tiles, board_width * board_height * sizeof(uint_fast16_t));
             can_undo = true;
-            tiles[selected[1] * board_height + selected[0]] = 0b110000000110;
+            (*tiles)[selected[1] * board_height + selected[0]] = 0b110000000110;
             enqueue_neighbors(update_queue, selected, board_width, board_height);
-            update_wave_function(tiles, update_queue, board_width, board_height);
+            update_wave_function(*tiles, update_queue, board_width, board_height);
         }
         if (key[ALLEGRO_KEY_7]) {
-            memcpy(prev_tiles, tiles, board_width * board_height * sizeof(uint_fast16_t));
+            memcpy(*prev_tiles, *tiles, board_width * board_height * sizeof(uint_fast16_t));
             can_undo = true;
-            tiles[selected[1] * board_height + selected[0]] = 0b110000000111;
+            (*tiles)[selected[1] * board_height + selected[0]] = 0b110000000111;
             enqueue_neighbors(update_queue, selected, board_width, board_height);
-            update_wave_function(tiles, update_queue, board_width, board_height);
+            update_wave_function(*tiles, update_queue, board_width, board_height);
         }
         if (key[ALLEGRO_KEY_8]) {
-            memcpy(prev_tiles, tiles, board_width * board_height * sizeof(uint_fast16_t));
+            memcpy(*prev_tiles, *tiles, board_width * board_height * sizeof(uint_fast16_t));
             can_undo = true;
-            tiles[selected[1] * board_height + selected[0]] = 0b110000001000;
+            (*tiles)[selected[1] * board_height + selected[0]] = 0b110000001000;
             enqueue_neighbors(update_queue, selected, board_width, board_height);
-            update_wave_function(tiles, update_queue, board_width, board_height);
+            update_wave_function(*tiles, update_queue, board_width, board_height);
         }
         if (key[ALLEGRO_KEY_M]) {
-            memcpy(prev_tiles, tiles, board_width * board_height * sizeof(uint_fast16_t));
+            memcpy(*prev_tiles, *tiles, board_width * board_height * sizeof(uint_fast16_t));
             can_undo = true;
-            tiles[selected[1] * board_height + selected[0]] = 0b110000001001;
+            *tiles[selected[1] * board_height + selected[0]] = 0b110000001001;
             enqueue_neighbors(update_queue, selected, board_width, board_height);
-            update_wave_function(tiles, update_queue, board_width, board_height);
+            update_wave_function(*tiles, update_queue, board_width, board_height);
         }
     }
     if (key[ALLEGRO_KEY_U] && can_undo) {
-        uint_fast16_t* tmp = tiles;
-        tiles = prev_tiles;
-        prev_tiles = tmp;
+        uint_fast16_t* tmp = *tiles;
+        *tiles = *prev_tiles;
+        *prev_tiles = tmp;
         can_undo = false;
     }
 }
@@ -314,7 +314,7 @@ int main()
         {
             case ALLEGRO_EVENT_TIMER:
                 // game logic
-                parse_input(tiles, prev_tiles, &update_queue, board_width, board_height);
+                parse_input(&tiles, &prev_tiles, &update_queue, board_width, board_height);
                 redraw = true;
                 break;
             case ALLEGRO_EVENT_DISPLAY_CLOSE:
