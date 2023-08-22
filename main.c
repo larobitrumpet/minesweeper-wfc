@@ -3,13 +3,10 @@
 #include <stdint.h>
 #include "allegro5/allegro5.h"
 #include "allegro5/allegro_image.h"
+#include "board.h"
 #include "render.h"
 #include "wave_function.h"
 #include "queue.h"
-
-bool can_undo;
-int selected[2];
-int select_move_cooldown;
 
 void must_init(bool test, const char *description)
 {
@@ -128,106 +125,64 @@ void keyboard_update(ALLEGRO_EVENT* event)
     }
 }
 
-void draw(uint_fast16_t* tiles, int board_width, int board_height)
+void draw(BOARD* board)
 {
     disp_pre_draw();
 
     // draw code
-    render(tiles, board_width, board_height);
+    render(board);
 
     disp_post_draw();
 }
 
-void make_known(uint_fast16_t* tiles, uint_fast16_t* prev_tiles, QUEUE* update_queue, int board_width, int board_height, uint_fast16_t number) {
-    memcpy(prev_tiles, tiles, board_width * board_height * sizeof(uint_fast16_t));
-    prev_tiles[selected[1] * board_height + selected[0]] &= 0b011111111111;
-    can_undo = true;
-    tiles[selected[1] * board_height + selected[0]] = 0b110000000000 | number;
-    enqueue_neighbors(update_queue, selected, board_width, board_height);
-    update_wave_function(tiles, update_queue, board_width, board_height);
-}
-
-void parse_input(uint_fast16_t** tiles, uint_fast16_t** prev_tiles, QUEUE* update_queue, int board_width, int board_height) {
+void parse_input(BOARD* board) {
     if (!(key[ALLEGRO_KEY_LEFT] || key[ALLEGRO_KEY_RIGHT] || key[ALLEGRO_KEY_UP] || key[ALLEGRO_KEY_DOWN])) {
-        select_move_cooldown = 0;
+        board->select_move_cooldown = 0;
     }
-    if (select_move_cooldown) {
-        select_move_cooldown--;
+    if (board->select_move_cooldown) {
+        board->select_move_cooldown--;
     } else {
-        (*tiles)[selected[1] * board_height + selected[0]] &= 0b011111111111;
-        if (key[ALLEGRO_KEY_LEFT]) {
-            selected[0]--;
-            select_move_cooldown = 8;
-        }
-        if (key[ALLEGRO_KEY_RIGHT]) {
-            selected[0]++;
-            select_move_cooldown = 8;
-        }
-        if (key[ALLEGRO_KEY_UP]) {
-            selected[1]--;
-            select_move_cooldown = 8;
-        }
-        if (key[ALLEGRO_KEY_DOWN]) {
-            selected[1]++;
-            select_move_cooldown = 8;
-        }
-        if (selected[0] < 0)
-            selected[0] = 0;
-        if (selected[0] > board_width - 1)
-            selected[0] = board_width - 1;
-        if (selected[1] < 0)
-            selected[1] = 0;
-        if (selected[1] > board_height - 1)
-            selected[1] = board_height - 1;
-        (*tiles)[selected[1] * board_height + selected[0]] |= 0b100000000000;
+        clear_selected(board);
+        if (key[ALLEGRO_KEY_LEFT])
+            move_left(board);
+        if (key[ALLEGRO_KEY_RIGHT])
+            move_right(board);
+        if (key[ALLEGRO_KEY_UP])
+            move_up(board);
+        if (key[ALLEGRO_KEY_DOWN])
+            move_down(board);
+        set_selected(board);
     }
-    if (!((*tiles)[selected[1] * board_height + selected[0]] & 0b010000000000)) {
+    if (!is_known(board)) {
         if (key[ALLEGRO_KEY_0])
-            make_known(*tiles, *prev_tiles, update_queue, board_width, board_height, 0);
+            make_known(board, 0);
         if (key[ALLEGRO_KEY_1])
-            make_known(*tiles, *prev_tiles, update_queue, board_width, board_height, 1);
+            make_known(board, 1);
         if (key[ALLEGRO_KEY_2])
-            make_known(*tiles, *prev_tiles, update_queue, board_width, board_height, 2);
+            make_known(board, 2);
         if (key[ALLEGRO_KEY_3])
-            make_known(*tiles, *prev_tiles, update_queue, board_width, board_height, 3);
+            make_known(board, 3);
         if (key[ALLEGRO_KEY_4])
-            make_known(*tiles, *prev_tiles, update_queue, board_width, board_height, 4);
+            make_known(board, 4);
         if (key[ALLEGRO_KEY_5])
-            make_known(*tiles, *prev_tiles, update_queue, board_width, board_height, 5);
+            make_known(board, 5);
         if (key[ALLEGRO_KEY_6])
-            make_known(*tiles, *prev_tiles, update_queue, board_width, board_height, 6);
+            make_known(board, 6);
         if (key[ALLEGRO_KEY_7])
-            make_known(*tiles, *prev_tiles, update_queue, board_width, board_height, 7);
+            make_known(board, 7);
         if (key[ALLEGRO_KEY_8])
-            make_known(*tiles, *prev_tiles, update_queue, board_width, board_height, 8);
+            make_known(board, 8);
         if (key[ALLEGRO_KEY_M])
-            make_known(*tiles, *prev_tiles, update_queue, board_width, board_height, 9);
+            make_known(board, 9);
     }
-    if (key[ALLEGRO_KEY_U] && can_undo) {
-        uint_fast16_t* tmp = *tiles;
-        *tiles = *prev_tiles;
-        *prev_tiles = tmp;
-        can_undo = false;
+    if (key[ALLEGRO_KEY_U]) {
+        undo(board);
     }
 }
 
 int main()
 {
-    int board_width = 16;
-    int board_height = 16;
-    uint_fast16_t* tiles = (uint_fast16_t*)malloc(sizeof(uint_fast16_t) * board_width * board_height);
-    uint_fast16_t* prev_tiles = (uint_fast16_t*)malloc(sizeof(uint_fast16_t) * board_width * board_height);
-    can_undo = false;
-    QUEUE update_queue = construct_queue(sizeof(int) * 2);
-    for (int y = 0; y < board_height; y++) {
-        for (int x = 0; x < board_width; x++) {
-            tiles[y * board_height + x] = 0b001111111111;
-            int p[2] = {x, y};
-            queue_enqueue(&update_queue, p);
-        }
-    }
-    tiles[selected[1] * board_height + selected[0]] |= 0b100000000000;
-    update_wave_function(tiles, &update_queue, board_width, board_height);
+    BOARD board = construct_board(16, 16);
 
     ALLEGRO_TIMER *timer;
     ALLEGRO_EVENT_QUEUE *queue;
@@ -273,7 +228,7 @@ int main()
         {
             case ALLEGRO_EVENT_TIMER:
                 // game logic
-                parse_input(&tiles, &prev_tiles, &update_queue, board_width, board_height);
+                parse_input(&board);
                 redraw = true;
                 break;
             case ALLEGRO_EVENT_DISPLAY_CLOSE:
@@ -302,15 +257,13 @@ int main()
         if (redraw && al_is_event_queue_empty(queue))
         {
             // redraw code
-            draw(tiles, board_width, board_height);
+            draw(&board);
             redraw = false;
         }
     }
 
     // deinit
-    deconstruct_queue(update_queue);
-    free(tiles);
-    free(prev_tiles);
+    deconstruct_board(board);
     sprites_deinit();
     disp_deinit();
     al_destroy_timer(timer);

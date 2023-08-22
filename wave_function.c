@@ -1,10 +1,10 @@
 #include "wave_function.h"
 
-void enqueue_neighbors(QUEUE* update_queue, int point[2], int board_width, int board_height) {
-    bool left = point[0] > 0;
-    bool right = point[0] < board_width - 1;
-    bool up = point[1] > 0;
-    bool down = point[1] < board_height - 1;
+void enqueue_neighbors(BOARD* board, POINT point) {
+    bool left = point.x > 0;
+    bool right = point.x < board->width - 1;
+    bool up = point.y > 0;
+    bool down = point.y < board->height - 1;
     bool mask[9] = {
         left && up,
         up,
@@ -16,14 +16,14 @@ void enqueue_neighbors(QUEUE* update_queue, int point[2], int board_width, int b
         down,
         right && down
     };
-    int p[2];
-    queue_enqueue(update_queue, point);
+    POINT p;
+    queue_enqueue(&board->update_queue, &point);
     for (int y = -1; y < 2; y++) {
         for (int x = -1; x < 2; x++) {
             if (mask[(y + 1) * 3 + (x + 1)]) {
-                p[0] = point[0] + x;
-                p[1] = point[1] + y;
-                queue_enqueue(update_queue, p);
+                p.x = point.x + x;
+                p.y = point.y + y;
+                queue_enqueue(&board->update_queue, &p);
             }
         }
     }
@@ -40,11 +40,11 @@ int num_possibilities(uint_fast16_t tile) {
     return num;
 }
 
-void num_mine_neighbors(uint_fast16_t* tiles, int point[2], unsigned int mines[2], int board_width, int board_height) {
-    bool left = point[0] > 0;
-    bool right = point[0] < board_width - 1;
-    bool up = point[1] > 0;
-    bool down = point[1] < board_height - 1;
+void num_mine_neighbors(BOARD* board, POINT point, unsigned int mines[2]) {
+    bool left = point.x > 0;
+    bool right = point.x < board->width - 1;
+    bool up = point.y > 0;
+    bool down = point.y < board->height - 1;
     bool mask[9] = {
         left && up,
         up,
@@ -56,18 +56,18 @@ void num_mine_neighbors(uint_fast16_t* tiles, int point[2], unsigned int mines[2
         down,
         right && down
     };
-    int p[2];
+    POINT p;
     mines[0] = 0;
     mines[1] = 0;
     for (int y = -1; y < 2; y++) {
         for (int x = -1; x < 2; x++) {
             if (mask[(y + 1) * 3 + (x + 1)]) {
-                p[0] = point[0] + x;
-                p[1] = point[1] + y;
-                if ((tiles[p[1] * board_height + p[0]] & 0b010000001111) == 0b010000001001) {
+                p.x = point.x + x;
+                p.y = point.y + y;
+                if ((get_tile_point(board, p) & 0b010000001111) == 0b010000001001) {
                     mines[0]++;
                     mines[1]++;
-                } else if ((tiles[p[1] * board_height + p[0]] & 0b011000000000) == 0b001000000000) {
+                } else if ((get_tile_point(board, p) & 0b011000000000) == 0b001000000000) {
                     mines[1]++;
                 }
             }
@@ -75,11 +75,11 @@ void num_mine_neighbors(uint_fast16_t* tiles, int point[2], unsigned int mines[2
     }
 }
 
-void collapse_mine_neighbors(uint_fast16_t* tiles, QUEUE* update_queue, int point[2], int board_width, int board_height) {
-    bool left = point[0] > 0;
-    bool right = point[0] < board_width - 1;
-    bool up = point[1] > 0;
-    bool down = point[1] < board_height - 1;
+void collapse_mine_neighbors(BOARD* board, POINT point) {
+    bool left = point.x > 0;
+    bool right = point.x < board->width - 1;
+    bool up = point.y > 0;
+    bool down = point.y < board->height - 1;
     bool mask[9] = {
         left && up,
         up,
@@ -91,32 +91,32 @@ void collapse_mine_neighbors(uint_fast16_t* tiles, QUEUE* update_queue, int poin
         down,
         right && down
     };
-    int p[2];
+    POINT p;
     for (int y = -1; y < 2; y++) {
         for (int x = -1; x < 2; x++) {
             if (mask[(y + 1) * 3 + (x + 1)]) {
-                p[0] = point[0] + x;
-                p[1] = point[1] + y;
+                p.x = point.x + x;
+                p.y = point.y + y;
                 #ifdef DEBUG
-                printf("Checking (%d, %d)\n", p[0], p[1]);
+                printf("Checking (%d, %d)\n", p.x, p.y);
                 #endif
-                if ((tiles[p[1] * board_height + p[0]] & 0b011000000000) == 0b001000000000) {
+                if ((get_tile_point(board, p) & 0b011000000000) == 0b001000000000) {
                     #ifdef DEBUG
                     printf("Collapsing\n");
                     #endif
-                    tiles[p[1] * board_height + p[0]] = 0b010000001001;
-                    enqueue_neighbors(update_queue, p, board_width, board_height);
+                    set_tile_point(board, p, 0b010000001001);
+                    enqueue_neighbors(board, p);
                 }
             }
         }
     }
 }
 
-void collapse_non_mine_neighbors(uint_fast16_t* tiles, QUEUE* update_queue, int point[2], int board_width, int board_height) {
-    bool left = point[0] > 0;
-    bool right = point[0] < board_width - 1;
-    bool up = point[1] > 0;
-    bool down = point[1] < board_height - 1;
+void collapse_non_mine_neighbors(BOARD* board, POINT point) {
+    bool left = point.x > 0;
+    bool right = point.x < board->width - 1;
+    bool up = point.y > 0;
+    bool down = point.y < board->height - 1;
     bool mask[9] = {
         left && up,
         up,
@@ -128,38 +128,38 @@ void collapse_non_mine_neighbors(uint_fast16_t* tiles, QUEUE* update_queue, int 
         down,
         right && down
     };
-    int p[2];
+    POINT p;
     for (int y = -1; y < 2; y++) {
         for (int x = -1; x < 2; x++) {
             if (mask[(y + 1) * 3 + (x + 1)]) {
-                p[0] = point[0] + x;
-                p[1] = point[1] + y;
+                p.x = point.x + x;
+                p.y = point.y + y;
                 #ifdef DEBUG
-                printf("Checking (%d, %d)\n", p[0], p[1]);
+                printf("Checking (%d, %d)\n", p.x, p.y);
                 #endif
-                if ((tiles[p[1] * board_height + p[0]] & 0b011000000000) == 0b001000000000) {
+                if ((get_tile_point(board, p) & 0b011000000000) == 0b001000000000) {
                     #ifdef DEBUG
                     printf("Collapsing\n");
                     #endif
-                    tiles[p[1] * board_height + p[0]] &= 0b110111111111;
-                    enqueue_neighbors(update_queue, p, board_width, board_height);
+                    set_tile_point(board, p, get_tile_point(board, p) & 0b110111111111);
+                    enqueue_neighbors(board, p);
                 }
             }
         }
     }
 }
 
-void update_wave_function(uint_fast16_t* tiles, QUEUE* update_queue, int board_width, int board_height) {
+void update_wave_function(BOARD* board) {
     #ifdef DEBUG
     printf("------------------------------------------------------------------------\n");
     printf("Updating\n");
     #endif
-    while (!(queue_is_empty(update_queue))) {
-        int point[2];
-        queue_dequeue(update_queue, point);
-        uint_fast16_t tile = tiles[point[1] * board_height + point[0]];
+    while (!(queue_is_empty(&board->update_queue))) {
+        POINT point;
+        queue_dequeue(&board->update_queue, &point);
+        uint_fast16_t tile = get_tile_point(board, point);
         #ifdef DEBUG
-        printf("Point: (%d, %d)\n", point[0], point[1]);
+        printf("Point: (%d, %d)\n", point.x, point.y);
         printf("Tile: %" PRIxFAST16 "\n", tile);
         #endif
         if (tile & 0b010000000000) {
@@ -167,7 +167,7 @@ void update_wave_function(uint_fast16_t* tiles, QUEUE* update_queue, int board_w
             printf("Tile is known\n");
             #endif
             unsigned int mines[2];
-            num_mine_neighbors(tiles, point, mines, board_width, board_height);
+            num_mine_neighbors(board, point, mines);
             if (mines[0] == mines[1]) {
                 #ifdef DEBUG
                 printf("Mines already collapsed\n");
@@ -178,14 +178,14 @@ void update_wave_function(uint_fast16_t* tiles, QUEUE* update_queue, int board_w
                 #ifdef DEBUG
                 printf("Collapsing non mine neighbors\n");
                 #endif
-                collapse_non_mine_neighbors(tiles, update_queue, point, board_width, board_height);
+                collapse_non_mine_neighbors(board, point);
                 continue;
             }
             if (mines[1] == (tile & 0b1111)) {
                 #ifdef DEBUG
                 printf("Collapsing mine neighbors\n");
                 #endif
-                collapse_mine_neighbors(tiles, update_queue, point, board_width, board_height);
+                collapse_mine_neighbors(board, point);
                 continue;
             }
             continue;
@@ -202,19 +202,19 @@ void update_wave_function(uint_fast16_t* tiles, QUEUE* update_queue, int board_w
             printf("Only 1 possibility: %d\n", i);
             #endif
             tile = 0b010000000000 | i;
-            tiles[point[1] * board_height + point[0]] = tile;
-            enqueue_neighbors(update_queue, point, board_width, board_height);
+            set_tile_point(board, point, tile);
+            enqueue_neighbors(board, point);
             continue;
         }
         unsigned int mines[2];
-        num_mine_neighbors(tiles, point, mines, board_width, board_height);
+        num_mine_neighbors(board, point, mines);
         if (mines[0] == mines[1] && !(tile & 0b001000000000)) {
             #ifdef DEBUG
             printf("Is a number: %d\n", mines[0]);
             #endif
             tile = 0b010000000000 | mines[0];
-            tiles[point[1] * board_height + point[0]] = tile;
-            enqueue_neighbors(update_queue, point, board_width, board_height);
+            set_tile_point(board, point, tile);
+            enqueue_neighbors(board, point);
             continue;
         }
         #ifdef DEBUG
@@ -243,7 +243,7 @@ void update_wave_function(uint_fast16_t* tiles, QUEUE* update_queue, int board_w
         #ifdef DEBUG
         printf("Tile is now %" PRIxFAST16 "\n" , tile);
         #endif
-        tiles[point[1] * board_height + point[0]] = tile;
-        enqueue_neighbors(update_queue, point, board_width, board_height);
+        set_tile_point(board, point, tile);
+        enqueue_neighbors(board, point);
     }
 }

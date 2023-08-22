@@ -54,10 +54,13 @@ void render_tile(uint_fast16_t tile, int x, int y) {
     }
 }
 
-void render(uint_fast16_t* tiles, int width, int height) {
-    for (int y = 0; y < height; y++) {
-        for (int x = 0; x < width; x++) {
-            render_tile(tiles[y * height + x], x, y);
+void render(BOARD* board) {
+    POINT p;
+    for (int y = 0; y < board->height; y++) {
+        for (int x = 0; x < board->width; x++) {
+            p.x = x;
+            p.y = y;
+            render_tile(get_tile_point(board, p), x, y);
         }
     }
 }

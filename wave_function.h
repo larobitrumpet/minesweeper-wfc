@@ -9,12 +9,13 @@
 #include <stdint.h>
 #include <assert.h>
 #include "queue.h"
+#include "board.h"
 
-void enqueue_neighbors(QUEUE* update_queue, int point[2], int board_width, int board_height);
+void enqueue_neighbors(BOARD* board, POINT point);
 int num_possibilities(uint_fast16_t tile);
-void num_mine_neighbors(uint_fast16_t* tiles, int point[2], unsigned int mines[2], int board_width, int board_height);
-void collapse_mine_neighbors(uint_fast16_t* tiles, QUEUE* update_queue, int point[2], int board_width, int board_height);
-void collapse_non_mine_neighbors(uint_fast16_t* tiles, QUEUE* update_queue, int point[2], int board_width, int board_height);
-void update_wave_function(uint_fast16_t* tiles, QUEUE* update_queue, int board_width, int board_height);
+void num_mine_neighbors(BOARD* board, POINT point, unsigned int mines[2]);
+void collapse_mine_neighbors(BOARD* board, POINT point);
+void collapse_non_mine_neighbors(BOARD* board, POINT point);
+void update_wave_function(BOARD* board);
 
 #endif

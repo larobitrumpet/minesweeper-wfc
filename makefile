@@ -17,7 +17,7 @@ endif
 
 all: $(program)
 
-objs := main.o render.o queue.o wave_function.o
+objs := main.o render.o queue.o wave_function.o board.o
 
 deps := $(patsubst %.o,%.d,$(objs))
 -include $(deps)
